@@ -1,15 +1,43 @@
 "use client";
 
-import { useActionState } from "react";
-import { ArrowRight, CheckCircle2, Mail, Radar } from "lucide-react";
+import { useActionState, useEffect, useState } from "react";
+import { AlertCircle, ArrowRight, CheckCircle2, Mail, Radar } from "lucide-react";
 import { signInWithMagicLink, type MagicLinkState } from "@/app/auth/actions";
 import { LuxuryCard } from "@/components/ui/luxury-card";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
 
 const initialState: MagicLinkState = { status: "idle", message: "" };
 
+function readLinkError(): string | null {
+  const query = new URLSearchParams(window.location.search);
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+
+  const raw =
+    query.get("error_description") ??
+    query.get("error") ??
+    hash.get("error_description") ??
+    hash.get("error");
+
+  if (!raw) return null;
+
+  try {
+    return decodeURIComponent(raw.replace(/\+/g, " "));
+  } catch {
+    return raw.replace(/\+/g, " ");
+  }
+}
+
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(signInWithMagicLink, initialState);
+  const [linkError, setLinkError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const message = readLinkError();
+    if (message) {
+      setLinkError(message);
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  }, []);
 
   return (
     <main className="flex min-h-screen flex-1 items-center justify-center px-6">
@@ -36,6 +64,13 @@ export default function LoginPage() {
                   We&apos;ll email you a magic link, no password needed.
                 </p>
               </div>
+
+              {linkError && (
+                <div className="flex items-start gap-2.5 rounded-lg border border-danger/30 bg-danger/10 px-3.5 py-3">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-danger" />
+                  <p className="text-sm text-danger">{linkError}</p>
+                </div>
+              )}
 
               <div>
                 <label className="text-xs font-medium text-muted" htmlFor="email">
