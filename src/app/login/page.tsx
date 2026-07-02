@@ -29,13 +29,14 @@ function readLinkError(): string | null {
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<Status>("idle");
-  const [message, setMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [linkError, setLinkError] = useState<string | null>(null);
 
   useEffect(() => {
-    const error = readLinkError();
-    if (error) {
-      setLinkError(error);
+    const err = readLinkError();
+    if (err) {
+      setLinkError(err);
       window.history.replaceState(null, "", window.location.pathname);
     }
   }, []);
@@ -43,7 +44,8 @@ export default function LoginPage() {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setStatus("pending");
-    setMessage("");
+    setError(null);
+    setLinkError(null);
 
     try {
       const res = await fetch("/api/auth/signin", {
@@ -61,19 +63,20 @@ export default function LoginPage() {
 
       if (!res.ok) {
         setStatus("error");
-        setMessage(result.error ?? "Failed to send magic link.");
+        setError(result.error ?? "Failed to send magic link.");
         return;
       }
 
       setStatus("success");
-      setMessage(result.message ?? `Magic link sent to ${email}.`);
+      setSuccessMessage(result.message ?? `Magic link sent to ${email}.`);
     } catch (err) {
       setStatus("error");
-      setMessage(err instanceof Error ? err.message : "Something went wrong.");
+      setError(err instanceof Error ? err.message : "Something went wrong.");
     }
   }
 
   const isPending = status === "pending";
+  const formError = error ?? linkError;
 
   return (
     <main className="flex min-h-screen flex-1 items-center justify-center px-6">
@@ -90,7 +93,7 @@ export default function LoginPage() {
             <div className="flex flex-col items-center gap-3 px-2 py-4 text-center">
               <CheckCircle2 className="h-8 w-8 text-success" />
               <p className="text-sm font-medium text-foreground">Check your inbox</p>
-              <p className="text-sm text-muted">{message}</p>
+              <p className="text-sm text-muted">{successMessage}</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -101,10 +104,10 @@ export default function LoginPage() {
                 </p>
               </div>
 
-              {linkError && (
+              {formError && (
                 <div className="flex items-start gap-2.5 rounded-lg border border-danger/30 bg-danger/10 px-3.5 py-3">
                   <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-danger" />
-                  <p className="text-sm text-danger">{linkError}</p>
+                  <p className="text-sm text-danger">{formError}</p>
                 </div>
               )}
 
@@ -126,8 +129,6 @@ export default function LoginPage() {
                   />
                 </div>
               </div>
-
-              {status === "error" && <p className="text-sm text-danger">{message}</p>}
 
               <ShimmerButton type="submit" disabled={isPending} className="w-full">
                 {isPending ? "Sending..." : "Send Magic Link"}
