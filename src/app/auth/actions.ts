@@ -9,6 +9,19 @@ export type MagicLinkState = {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+function resolveSiteUrl(): string {
+  const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "");
+  if (configured) return configured;
+
+  const productionUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (productionUrl) return `https://${productionUrl}`;
+
+  const deploymentUrl = process.env.VERCEL_URL?.trim();
+  if (deploymentUrl) return `https://${deploymentUrl}`;
+
+  return "http://localhost:3000";
+}
+
 export async function signInWithMagicLink(
   _prevState: MagicLinkState,
   formData: FormData,
@@ -19,19 +32,26 @@ export async function signInWithMagicLink(
     return { status: "error", message: "Enter a valid email address." };
   }
 
-  const supabase = await createClient();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  try {
+    const supabase = await createClient();
+    const siteUrl = resolveSiteUrl();
 
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: {
-      emailRedirectTo: `${siteUrl}/auth/callback`,
-    },
-  });
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${siteUrl}/auth/callback`,
+      },
+    });
 
-  if (error) {
-    return { status: "error", message: error.message };
+    if (error) {
+      return { status: "error", message: error.message };
+    }
+
+    return { status: "success", message: `Magic link sent to ${email}.` };
+  } catch {
+    return {
+      status: "error",
+      message: "Something went wrong sending the magic link. Please try again.",
+    };
   }
-
-  return { status: "success", message: `Magic link sent to ${email}.` };
 }
