@@ -3,19 +3,23 @@ import { type NextRequest, NextResponse } from "next/server";
 
 // Refreshes the Supabase auth session cookie on every request so magic-link
 // sessions stay valid across Server Components (which can't write cookies).
+// Never lets a Supabase failure (missing/malformed env vars, network error,
+// cookie edge case) take the whole site down — always falls back to a
+// plain pass-through response.
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  const passThrough = NextResponse.next({ request });
 
-  // Not configured yet (e.g. local dev before .env.local exists) — skip
-  // the session refresh instead of 500ing on every request.
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    return response;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return passThrough;
   }
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
+  try {
+    let response = passThrough;
+
+    const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
       cookies: {
         getAll() {
           return request.cookies.getAll();
@@ -28,12 +32,14 @@ export async function middleware(request: NextRequest) {
           );
         },
       },
-    },
-  );
+    });
 
-  await supabase.auth.getUser();
+    await supabase.auth.getUser();
 
-  return response;
+    return response;
+  } catch {
+    return passThrough;
+  }
 }
 
 export const config = {
