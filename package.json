@@ -1,0 +1,36 @@
+{
+  "name": "spyoutreach",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@sparticuz/chromium": "^149.0.0",
+    "@supabase/ssr": "^0.7.0",
+    "@supabase/supabase-js": "^2",
+    "lucide-react": "^0.545.0",
+    "next": "15.5.19",
+    "papaparse": "^5.4.1",
+    "puppeteer-core": "25.3.0",
+    "react": "^19",
+    "react-dom": "^19",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/papaparse": "^5.3.15",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.19",
+    "puppeteer": "25.3.0",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
