@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Radar, RefreshCw, User, Zap } from "lucide-react";
 import { LeadCleanserTab } from "./lead-cleanser-tab";
 import { SpyBriefTab } from "./spy-brief-tab";
+import { LuxuryChip } from "@/components/ui/luxury-chip";
 
 type Tab = "cleanser" | "brief";
 
@@ -44,10 +45,10 @@ export function DashboardShell({ credits, email }: { credits: number; email: str
               <User className="h-3.5 w-3.5" />
               <span>{email}</span>
             </div>
-            <div className="flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1.5 text-xs text-foreground">
+            <LuxuryChip className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-foreground">
               <Zap className="h-3.5 w-3.5 text-accent" />
               <span>{liveCredits} credits</span>
-            </div>
+            </LuxuryChip>
             <button
               onClick={checkPayment}
               disabled={isChecking}
@@ -61,7 +62,7 @@ export function DashboardShell({ credits, email }: { credits: number; email: str
       </header>
 
       <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-12">
-        <div className="mb-10 inline-flex rounded-full border border-border bg-surface p-1">
+        <LuxuryChip className="mb-10 inline-flex p-1">
           {TABS.map(({ id, label }) => (
             <button
               key={id}
@@ -75,7 +76,7 @@ export function DashboardShell({ credits, email }: { credits: number; email: str
               {label}
             </button>
           ))}
-        </div>
+        </LuxuryChip>
 
         {tab === "cleanser" ? (
           <LeadCleanserTab onCleaned={setLiveCredits} />

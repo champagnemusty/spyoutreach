@@ -3,6 +3,8 @@
 import { useActionState } from "react";
 import { ArrowRight, CheckCircle2, Mail, Radar } from "lucide-react";
 import { signInWithMagicLink, type MagicLinkState } from "@/app/auth/actions";
+import { LuxuryCard } from "@/components/ui/luxury-card";
+import { ShimmerButton } from "@/components/ui/shimmer-button";
 
 const initialState: MagicLinkState = { status: "idle", message: "" };
 
@@ -19,7 +21,7 @@ export default function LoginPage() {
           </span>
         </div>
 
-        <div className="rounded-xl border border-border bg-surface p-6">
+        <LuxuryCard className="p-6">
           {state.status === "success" ? (
             <div className="flex flex-col items-center gap-3 px-2 py-4 text-center">
               <CheckCircle2 className="h-8 w-8 text-success" />
@@ -56,17 +58,13 @@ export default function LoginPage() {
                 <p className="text-sm text-danger">{state.message}</p>
               )}
 
-              <button
-                type="submit"
-                disabled={isPending}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors enabled:hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
-              >
+              <ShimmerButton type="submit" disabled={isPending} className="w-full">
                 {isPending ? "Sending..." : "Send Magic Link"}
                 <ArrowRight className="h-4 w-4" />
-              </button>
+              </ShimmerButton>
             </form>
           )}
-        </div>
+        </LuxuryCard>
       </div>
     </main>
   );
