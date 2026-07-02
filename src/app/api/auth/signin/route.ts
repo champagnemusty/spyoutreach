@@ -1,11 +1,7 @@
-"use server";
-
+import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-export type MagicLinkState = {
-  status: "idle" | "success" | "error";
-  message: string;
-};
+export const runtime = "nodejs";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -22,17 +18,20 @@ function resolveSiteUrl(): string {
   return "http://localhost:3000";
 }
 
-export async function signInWithMagicLink(
-  _prevState: MagicLinkState,
-  formData: FormData,
-): Promise<MagicLinkState> {
-  const email = String(formData.get("email") ?? "").trim();
-
-  if (!EMAIL_RE.test(email)) {
-    return { status: "error", message: "Enter a valid email address." };
-  }
-
+export async function POST(request: Request) {
   try {
+    let email = "";
+    try {
+      const body = await request.json();
+      email = String(body?.email ?? "").trim();
+    } catch {
+      return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+    }
+
+    if (!EMAIL_RE.test(email)) {
+      return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
+    }
+
     const supabase = await createClient();
     const siteUrl = resolveSiteUrl();
 
@@ -44,14 +43,14 @@ export async function signInWithMagicLink(
     });
 
     if (error) {
-      return { status: "error", message: error.message };
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    return { status: "success", message: `Magic link sent to ${email}.` };
+    return NextResponse.json({ message: `Magic link sent to ${email}.` });
   } catch {
-    return {
-      status: "error",
-      message: "Something went wrong sending the magic link. Please try again.",
-    };
+    return NextResponse.json(
+      { error: "Something went wrong sending the magic link. Please try again." },
+      { status: 500 },
+    );
   }
 }

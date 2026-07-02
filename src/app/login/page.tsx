@@ -1,12 +1,11 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { AlertCircle, ArrowRight, CheckCircle2, Mail, Radar } from "lucide-react";
-import { signInWithMagicLink, type MagicLinkState } from "@/app/auth/actions";
 import { LuxuryCard } from "@/components/ui/luxury-card";
 import { ShimmerButton } from "@/components/ui/shimmer-button";
 
-const initialState: MagicLinkState = { status: "idle", message: "" };
+type Status = "idle" | "pending" | "success" | "error";
 
 function readLinkError(): string | null {
   const query = new URLSearchParams(window.location.search);
@@ -28,16 +27,53 @@ function readLinkError(): string | null {
 }
 
 export default function LoginPage() {
-  const [state, formAction, isPending] = useActionState(signInWithMagicLink, initialState);
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<Status>("idle");
+  const [message, setMessage] = useState("");
   const [linkError, setLinkError] = useState<string | null>(null);
 
   useEffect(() => {
-    const message = readLinkError();
-    if (message) {
-      setLinkError(message);
+    const error = readLinkError();
+    if (error) {
+      setLinkError(error);
       window.history.replaceState(null, "", window.location.pathname);
     }
   }, []);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setStatus("pending");
+    setMessage("");
+
+    try {
+      const res = await fetch("/api/auth/signin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const contentType = res.headers.get("content-type") ?? "";
+      if (!contentType.includes("application/json")) {
+        throw new Error("Unexpected server response. Please try again.");
+      }
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        setStatus("error");
+        setMessage(result.error ?? "Failed to send magic link.");
+        return;
+      }
+
+      setStatus("success");
+      setMessage(result.message ?? `Magic link sent to ${email}.`);
+    } catch (err) {
+      setStatus("error");
+      setMessage(err instanceof Error ? err.message : "Something went wrong.");
+    }
+  }
+
+  const isPending = status === "pending";
 
   return (
     <main className="flex min-h-screen flex-1 items-center justify-center px-6">
@@ -50,14 +86,14 @@ export default function LoginPage() {
         </div>
 
         <LuxuryCard className="p-6">
-          {state.status === "success" ? (
+          {status === "success" ? (
             <div className="flex flex-col items-center gap-3 px-2 py-4 text-center">
               <CheckCircle2 className="h-8 w-8 text-success" />
               <p className="text-sm font-medium text-foreground">Check your inbox</p>
-              <p className="text-sm text-muted">{state.message}</p>
+              <p className="text-sm text-muted">{message}</p>
             </div>
           ) : (
-            <form action={formAction} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <h1 className="text-lg font-medium text-foreground">Sign in</h1>
                 <p className="mt-1 text-sm text-muted">
@@ -83,15 +119,15 @@ export default function LoginPage() {
                     name="email"
                     type="email"
                     required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@agency.com"
                     className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-dim focus:outline-none"
                   />
                 </div>
               </div>
 
-              {state.status === "error" && (
-                <p className="text-sm text-danger">{state.message}</p>
-              )}
+              {status === "error" && <p className="text-sm text-danger">{message}</p>}
 
               <ShimmerButton type="submit" disabled={isPending} className="w-full">
                 {isPending ? "Sending..." : "Send Magic Link"}
