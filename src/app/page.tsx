@@ -45,7 +45,7 @@ export default function LandingPage() {
 
       <section className="mx-auto w-full max-w-3xl px-6 py-24 text-center">
         <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
-          Clean leads. Steal ad strategies.
+          Clean leads. Decode their ad strategy.
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-base text-muted">
           Built for agencies that move fast. Turn messy B2B lists into clean data, and turn any

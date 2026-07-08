@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SpyOutreach — Clean leads. Steal ad strategies.",
+  title: "SpyOutreach — Clean leads. Decode their ad strategy.",
   description:
     "Clean raw B2B lead lists and generate competitor ad-strategy briefs, built for agencies that move fast.",
 };
