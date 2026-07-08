@@ -3,6 +3,7 @@ import { LuxuryCard } from "@/components/ui/luxury-card";
 
 const STORE_URL =
   process.env.NEXT_PUBLIC_LEMONSQUEEZY_STORE_URL ?? "https://spyoutreach.lemonsqueezy.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 type Package = {
   name: string;
@@ -44,6 +45,7 @@ function checkoutUrl(checkoutSlug: string, userId: string, email: string) {
   const params = new URLSearchParams({
     "checkout[custom][user_id]": userId,
     "checkout[email]": email,
+    "checkout[redirect_url]": `${SITE_URL}/?purchase=success`,
   });
   return `${STORE_URL}/checkout/buy/${checkoutSlug}?${params.toString()}`;
 }
