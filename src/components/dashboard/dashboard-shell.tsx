@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Radar, RefreshCw, User, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CheckCircle2, Radar, RefreshCw, User, Zap } from "lucide-react";
 import { LeadCleanserTab } from "./lead-cleanser-tab";
 import { SpyBriefTab } from "./spy-brief-tab";
 import { BuyCreditsTab } from "./buy-credits-tab";
@@ -27,6 +27,15 @@ export function DashboardShell({
   const [tab, setTab] = useState<Tab>("cleanser");
   const [isChecking, setIsChecking] = useState(false);
   const [liveCredits, setLiveCredits] = useState(credits);
+  const [showPurchaseSuccess, setShowPurchaseSuccess] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("purchase") === "success") {
+      setShowPurchaseSuccess(true);
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  }, []);
 
   async function checkPayment() {
     setIsChecking(true);
@@ -72,6 +81,16 @@ export function DashboardShell({
       </header>
 
       <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-12">
+        {showPurchaseSuccess && (
+          <div className="mb-8 flex items-start gap-2.5 rounded-lg border border-success/30 bg-success/10 px-3.5 py-3">
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+            <p className="text-sm text-success">
+              Payment received! Your credits will update within a few seconds — refresh if you
+              don&apos;t see them yet.
+            </p>
+          </div>
+        )}
+
         <LuxuryChip className="mb-10 inline-flex p-1">
           {TABS.map(({ id, label }) => (
             <button

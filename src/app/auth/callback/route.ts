@@ -6,7 +6,7 @@ const EXPIRED_LINK_MESSAGE = "Your magic link is invalid or has expired. Please 
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
-  const next = searchParams.get("next") ?? "/";
+  const next = searchParams.get("next") ?? "/dashboard";
 
   const queryError = searchParams.get("error_description") ?? searchParams.get("error");
   if (queryError) {

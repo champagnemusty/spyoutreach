@@ -45,7 +45,7 @@ function checkoutUrl(checkoutSlug: string, userId: string, email: string) {
   const params = new URLSearchParams({
     "checkout[custom][user_id]": userId,
     "checkout[email]": email,
-    "checkout[redirect_url]": `${SITE_URL}/?purchase=success`,
+    "checkout[redirect_url]": `${SITE_URL}/dashboard?purchase=success`,
   });
   return `${STORE_URL}/checkout/buy/${checkoutSlug}?${params.toString()}`;
 }
