@@ -153,9 +153,19 @@ export default function LandingPage() {
       </section>
 
       <footer className="border-t border-border py-8">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 text-xs text-muted">
+        <div className="mx-auto flex max-w-5xl flex-col items-center gap-3 px-6 text-xs text-muted sm:flex-row sm:justify-between">
           <span>© {new Date().getFullYear()} SpyOutreach</span>
-          <span>Built for agencies that move fast.</span>
+          <div className="flex items-center gap-4">
+            <Link href="/terms" className="transition-colors hover:text-foreground">
+              Terms
+            </Link>
+            <Link href="/privacy" className="transition-colors hover:text-foreground">
+              Privacy
+            </Link>
+            <Link href="/refund" className="transition-colors hover:text-foreground">
+              Refunds
+            </Link>
+          </div>
         </div>
       </footer>
     </main>
