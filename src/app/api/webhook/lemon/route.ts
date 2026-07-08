@@ -4,10 +4,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
 
-// Lemon Squeezy variant ID -> credits granted. Fill in with real variant IDs
-// from the store dashboard; unmatched variants fall back to DEFAULT_CREDITS.
+// Lemon Squeezy variant ID -> credits granted.
 const CREDIT_PACKAGES: Record<string, number> = {
-  "1862478": 20,
+  "1883911": 20, // Starter — $9
+  "1883904": 60, // Growth — $24
+  "1883906": 150, // Agency — $49
 };
 const DEFAULT_CREDITS = 20;
 

@@ -4,16 +4,26 @@ import { useState } from "react";
 import { Radar, RefreshCw, User, Zap } from "lucide-react";
 import { LeadCleanserTab } from "./lead-cleanser-tab";
 import { SpyBriefTab } from "./spy-brief-tab";
+import { BuyCreditsTab } from "./buy-credits-tab";
 import { LuxuryChip } from "@/components/ui/luxury-chip";
 
-type Tab = "cleanser" | "brief";
+type Tab = "cleanser" | "brief" | "credits";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "cleanser", label: "Lead Cleanser" },
   { id: "brief", label: "Spy Brief Generator" },
+  { id: "credits", label: "Buy Credits" },
 ];
 
-export function DashboardShell({ credits, email }: { credits: number; email: string }) {
+export function DashboardShell({
+  credits,
+  email,
+  userId,
+}: {
+  credits: number;
+  email: string;
+  userId: string;
+}) {
   const [tab, setTab] = useState<Tab>("cleanser");
   const [isChecking, setIsChecking] = useState(false);
   const [liveCredits, setLiveCredits] = useState(credits);
@@ -78,11 +88,9 @@ export function DashboardShell({ credits, email }: { credits: number; email: str
           ))}
         </LuxuryChip>
 
-        {tab === "cleanser" ? (
-          <LeadCleanserTab onCleaned={setLiveCredits} />
-        ) : (
-          <SpyBriefTab onGenerated={setLiveCredits} />
-        )}
+        {tab === "cleanser" && <LeadCleanserTab onCleaned={setLiveCredits} />}
+        {tab === "brief" && <SpyBriefTab onGenerated={setLiveCredits} />}
+        {tab === "credits" && <BuyCreditsTab userId={userId} email={email} />}
       </main>
     </div>
   );

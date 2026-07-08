@@ -18,5 +18,7 @@ export default async function Home() {
     .eq("id", user.id)
     .single();
 
-  return <DashboardShell credits={profile?.credits ?? 0} email={user.email ?? ""} />;
+  return (
+    <DashboardShell credits={profile?.credits ?? 0} email={user.email ?? ""} userId={user.id} />
+  );
 }
