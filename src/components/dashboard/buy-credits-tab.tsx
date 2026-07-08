@@ -6,24 +6,26 @@ const STORE_URL =
 
 type Package = {
   name: string;
-  variantId: string;
+  checkoutSlug: string;
   credits: number;
   price: number;
   highlight?: boolean;
   perks: string[];
 };
 
+// checkoutSlug is the variant's Lemon Squeezy checkout UUID (variant.attributes.slug),
+// not the numeric variant id used by the webhook for CREDIT_PACKAGES matching.
 const PACKAGES: Package[] = [
   {
     name: "Starter",
-    variantId: "1883911",
+    checkoutSlug: "9ad8542d-25eb-4453-83bb-10b10c1a2668",
     credits: 20,
     price: 9,
     perks: ["20 credits", "Never expires"],
   },
   {
     name: "Growth",
-    variantId: "1883904",
+    checkoutSlug: "1f0b3a29-07c6-476b-8b70-9de5b24aca19",
     credits: 60,
     price: 24,
     highlight: true,
@@ -31,19 +33,19 @@ const PACKAGES: Package[] = [
   },
   {
     name: "Agency",
-    variantId: "1883906",
+    checkoutSlug: "23f939a6-d9b3-4c06-b25b-bdcdb9c3e604",
     credits: 150,
     price: 49,
     perks: ["150 credits", "Lowest cost per credit", "Never expires"],
   },
 ];
 
-function checkoutUrl(variantId: string, userId: string, email: string) {
+function checkoutUrl(checkoutSlug: string, userId: string, email: string) {
   const params = new URLSearchParams({
     "checkout[custom][user_id]": userId,
     "checkout[email]": email,
   });
-  return `${STORE_URL}/checkout/buy/${variantId}?${params.toString()}`;
+  return `${STORE_URL}/checkout/buy/${checkoutSlug}?${params.toString()}`;
 }
 
 export function BuyCreditsTab({ userId, email }: { userId: string; email: string }) {
@@ -58,7 +60,7 @@ export function BuyCreditsTab({ userId, email }: { userId: string; email: string
 
       <div className="grid gap-5 sm:grid-cols-3">
         {PACKAGES.map((pkg) => (
-          <LuxuryCard key={pkg.variantId} className="flex flex-col p-6">
+          <LuxuryCard key={pkg.checkoutSlug} className="flex flex-col p-6">
             {pkg.highlight && (
               <span className="mb-3 inline-flex w-fit items-center rounded-full bg-accent px-2.5 py-1 text-[11px] font-medium text-white">
                 Most popular
@@ -89,7 +91,7 @@ export function BuyCreditsTab({ userId, email }: { userId: string; email: string
             </ul>
 
             <a
-              href={checkoutUrl(pkg.variantId, userId, email)}
+              href={checkoutUrl(pkg.checkoutSlug, userId, email)}
               className="shimmer-button mt-6 flex items-center justify-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-accent-hover"
             >
               <span className="relative z-10">Buy {pkg.name}</span>
