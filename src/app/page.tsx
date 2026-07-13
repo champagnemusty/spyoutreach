@@ -72,7 +72,7 @@ export default function LandingPage() {
       </section>
 
       <section className="mx-auto w-full max-w-5xl px-6 pb-24">
-        <div className="grid gap-5 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
           <LuxuryCard className="flex flex-col p-6 lg:col-span-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-hover">
               <Upload className="h-5 w-5 text-accent" />
@@ -123,11 +123,11 @@ export default function LandingPage() {
           </p>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
           {PACKAGES.map((pkg) => (
-            <div key={pkg.name} className={pkg.highlight ? "sm:-translate-y-3" : ""}>
             <LuxuryCard
-              className={`flex flex-col p-6 ${pkg.highlight ? "shadow-2xl shadow-accent/10" : ""}`}
+              key={pkg.name}
+              className={`flex flex-col p-6 ${pkg.highlight ? "shadow-2xl shadow-accent/10 sm:-translate-y-3" : ""}`}
             >
               {pkg.highlight && (
                 <span className="mb-3 inline-flex w-fit items-center rounded-full bg-accent px-2.5 py-1 text-[11px] font-medium text-white">
@@ -161,7 +161,6 @@ export default function LandingPage() {
                 Get Started
               </Link>
             </LuxuryCard>
-            </div>
           ))}
         </div>
       </section>

@@ -60,11 +60,11 @@ export function BuyCreditsTab({ userId, email }: { userId: string; email: string
         </p>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
         {PACKAGES.map((pkg) => (
-          <div key={pkg.checkoutSlug} className={pkg.highlight ? "sm:-translate-y-3" : ""}>
           <LuxuryCard
-            className={`flex flex-col p-6 ${pkg.highlight ? "shadow-2xl shadow-accent/10" : ""}`}
+            key={pkg.checkoutSlug}
+            className={`flex flex-col p-6 ${pkg.highlight ? "shadow-2xl shadow-accent/10 sm:-translate-y-3" : ""}`}
           >
             {pkg.highlight && (
               <span className="mb-3 inline-flex w-fit items-center rounded-full bg-accent px-2.5 py-1 text-[11px] font-medium text-white">
@@ -102,7 +102,6 @@ export function BuyCreditsTab({ userId, email }: { userId: string; email: string
               <span className="relative z-10">Buy {pkg.name}</span>
             </a>
           </LuxuryCard>
-          </div>
         ))}
       </div>
 

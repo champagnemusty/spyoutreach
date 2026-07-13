@@ -80,9 +80,23 @@ body {
   }
 }
 
+/* Single-element gradient border via mask-composite — className passed by
+   callers applies directly to this real element (grid/flex layout classes,
+   margins, transforms all behave predictably), no wrapper-div indirection. */
 .luxury-border {
   position: relative;
+  isolation: isolate;
   border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  backdrop-filter: blur(12px);
+}
+
+.luxury-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
   padding: 1px;
   background: linear-gradient(
     115deg,
@@ -94,13 +108,10 @@ body {
   );
   background-size: 250% 250%;
   animation: luxury-border-sweep 9s ease-in-out infinite;
-}
-
-.luxury-border-inner {
-  border-radius: calc(0.75rem - 1px);
-  background: color-mix(in srgb, var(--surface) 80%, transparent);
-  backdrop-filter: blur(12px);
-  height: 100%;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 .ambient-glow {
@@ -113,17 +124,25 @@ body {
 
 .luxury-chip {
   position: relative;
+  isolation: isolate;
   display: inline-flex;
-  border-radius: 999px;
-  padding: 1px;
-  background: linear-gradient(115deg, var(--border-strong) 0%, var(--accent) 50%, var(--border-strong) 100%);
-}
-
-.luxury-chip-inner {
   border-radius: 999px;
   background: color-mix(in srgb, var(--surface) 80%, transparent);
   backdrop-filter: blur(12px);
-  height: 100%;
+}
+
+.luxury-chip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(115deg, var(--border-strong) 0%, var(--accent) 50%, var(--border-strong) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 @keyframes shimmer-sweep {
