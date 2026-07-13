@@ -2,11 +2,9 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
     "src/app/api/spy/route.ts": {
-      "memory": 1536,
       "maxDuration": 60
     },
     "src/app/api/cleanse/route.ts": {
-      "memory": 1024,
       "maxDuration": 30
     }
   }
