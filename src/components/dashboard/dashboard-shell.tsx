@@ -49,8 +49,10 @@ export function DashboardShell({
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="border-b border-border">
+    <div className="relative flex min-h-screen flex-col overflow-hidden">
+      <div className="ambient-glow -top-32 left-1/3 h-96 w-96" />
+
+      <header className="relative border-b border-border">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-2">
             <Radar className="h-5 w-5 text-accent" />
@@ -80,7 +82,7 @@ export function DashboardShell({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-12">
+      <main className="relative mx-auto w-full max-w-5xl flex-1 px-6 py-12">
         {showPurchaseSuccess && (
           <div className="mb-8 flex items-start gap-2.5 rounded-lg border border-success/30 bg-success/10 px-3.5 py-3">
             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-success" />

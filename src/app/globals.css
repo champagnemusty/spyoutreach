@@ -121,7 +121,8 @@ body {
 
 .luxury-chip-inner {
   border-radius: 999px;
-  background: var(--surface);
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  backdrop-filter: blur(12px);
   height: 100%;
 }
 
