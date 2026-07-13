@@ -90,8 +90,11 @@ export default function LoginPage() {
   const isPending = status === "pending";
 
   return (
-    <main className="flex min-h-screen flex-1 items-center justify-center px-6">
-      <div className="w-full max-w-sm">
+    <main className="relative flex min-h-screen flex-1 items-center justify-center overflow-hidden px-6">
+      <div className="ambient-glow -top-10 left-1/4 h-72 w-72" />
+      <div className="ambient-glow bottom-0 right-1/4 h-72 w-72" />
+
+      <div className="relative w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center gap-2 text-center">
           <Radar className="h-6 w-6 text-accent" />
           <span className="text-sm font-semibold tracking-tight text-foreground">

@@ -98,8 +98,17 @@ body {
 
 .luxury-border-inner {
   border-radius: calc(0.75rem - 1px);
-  background: var(--surface);
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  backdrop-filter: blur(12px);
   height: 100%;
+}
+
+.ambient-glow {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(120px);
+  pointer-events: none;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
 }
 
 .luxury-chip {
