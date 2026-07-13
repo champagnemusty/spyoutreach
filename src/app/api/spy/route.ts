@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { launchBrowser } from "@/lib/browser";
-import { buildSpyBrief, renderSpyBriefHtml } from "@/lib/reports/spy-brief";
+import { buildSpyBriefMeta, renderSpyBriefHtml, type SpyBrief } from "@/lib/reports/spy-brief";
+import { resolveBriefSections } from "@/lib/reports/ai-brief";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -44,12 +45,15 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Insufficient credits." }, { status: 402 });
   }
 
-  const brief = buildSpyBrief(target);
-  const html = renderSpyBriefHtml(brief);
+  const meta = buildSpyBriefMeta(target);
 
   const browser = await launchBrowser();
   let pdfBuffer: Buffer;
   try {
+    const sections = await resolveBriefSections(browser, target, meta.brandName);
+    const brief: SpyBrief = { ...meta, sections };
+    const html = renderSpyBriefHtml(brief);
+
     const page = await browser.newPage();
     await page.emulateMediaFeatures([{ name: "prefers-color-scheme", value: "light" }]);
     await page.setContent(html);
@@ -82,14 +86,14 @@ export async function POST(request: Request) {
 
   await admin.from("pdf_reports").insert({
     user_id: user.id,
-    brand_name: brief.brandName,
+    brand_name: meta.brandName,
     brand_url: URL_RE.test(target) ? target : null,
     status: "completed",
     credits_used: 1,
     completed_at: new Date().toISOString(),
   });
 
-  const filename = `spy-brief-${brief.brandName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.pdf`;
+  const filename = `spy-brief-${meta.brandName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.pdf`;
 
   return NextResponse.json({
     filename,

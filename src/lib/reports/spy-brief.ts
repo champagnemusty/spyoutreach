@@ -1,4 +1,4 @@
-type BriefSection = {
+export type BriefSection = {
   title: string;
   body: string[];
 };
@@ -10,7 +10,15 @@ export type SpyBrief = {
   sections: BriefSection[];
 };
 
-function extractBrandName(target: string): string {
+export const BRIEF_SECTION_TITLES = [
+  "Positioning & Brand Narrative",
+  "Ad Creative Breakdown",
+  "Messaging Angles, Ranked by Frequency",
+  "Funnel & Offer Teardown",
+  "Recommended Strategy",
+] as const;
+
+export function extractBrandName(target: string): string {
   const trimmed = target.trim();
 
   try {
@@ -28,61 +36,64 @@ function extractBrandName(target: string): string {
   return trimmed;
 }
 
-export function buildSpyBrief(target: string): SpyBrief {
-  const brandName = extractBrandName(target);
-
+export function buildSpyBriefMeta(target: string): Omit<SpyBrief, "sections"> {
   return {
-    brandName,
+    brandName: extractBrandName(target),
     target,
     generatedAt: new Date().toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
       day: "numeric",
     }),
-    sections: [
-      {
-        title: "Positioning & Brand Narrative",
-        body: [
-          `${brandName} positions itself around a core promise rather than a feature list — the brand narrative leads with outcome, not product.`,
-          "Expect a founder-led or mission-led story arc in top-funnel creative, reserving specs and pricing for mid-to-bottom funnel assets.",
-          "Visual identity favors a small, consistent color palette and a single recognizable typographic voice across every touchpoint.",
-        ],
-      },
-      {
-        title: "Ad Creative Breakdown",
-        body: [
-          "UGC-style video (0:15–0:30) leading with a relatable problem, cutting to product-in-use within the first 3 seconds.",
-          "Static carousel ads pairing a bold claim headline with a proof point — a review, a stat, or a before/after — on each frame.",
-          "Founder-to-camera or authority testimonial format used to build trust ahead of a retargeting offer.",
-        ],
-      },
-      {
-        title: "Messaging Angles, Ranked by Frequency",
-        body: [
-          "1. Social proof — reviews, ratings, and \"as seen in\" placements.",
-          "2. Problem–agitate–solve — naming the pain point before introducing the product as relief.",
-          "3. Urgency and scarcity — limited restock, time-boxed discount, or waitlist framing.",
-          "4. Comparison — implicit or explicit contrast against the category default or DIY alternative.",
-        ],
-      },
-      {
-        title: "Funnel & Offer Teardown",
-        body: [
-          "Landing pages are single-offer, single-CTA, with objection-handling FAQ placed just above the fold.",
-          "Primary offer mechanic is a bundle discount or a free-shipping threshold rather than a blanket percentage off.",
-          "Post-purchase upsell or subscription option is introduced after checkout intent, not before.",
-        ],
-      },
-      {
-        title: "Recommended Strategy",
-        body: [
-          `Open your pitch by naming the angle ${brandName} has not claimed yet — the gap is the opening.`,
-          "Lead your first test round with a UGC-style hook plus a comparison angle; both are cheap to produce and fast to read.",
-          "Match their offer structure only where it lowers risk for the buyer, and differentiate everywhere else.",
-        ],
-      },
-    ],
   };
+}
+
+// Fallback content used when the AI call fails or is unavailable — keeps the
+// feature working (and credit-worthy) even if Anthropic is down or unfunded.
+export function templateSections(brandName: string): BriefSection[] {
+  return [
+    {
+      title: "Positioning & Brand Narrative",
+      body: [
+        `${brandName} positions itself around a core promise rather than a feature list — the brand narrative leads with outcome, not product.`,
+        "Expect a founder-led or mission-led story arc in top-funnel creative, reserving specs and pricing for mid-to-bottom funnel assets.",
+        "Visual identity favors a small, consistent color palette and a single recognizable typographic voice across every touchpoint.",
+      ],
+    },
+    {
+      title: "Ad Creative Breakdown",
+      body: [
+        "UGC-style video (0:15–0:30) leading with a relatable problem, cutting to product-in-use within the first 3 seconds.",
+        "Static carousel ads pairing a bold claim headline with a proof point — a review, a stat, or a before/after — on each frame.",
+        "Founder-to-camera or authority testimonial format used to build trust ahead of a retargeting offer.",
+      ],
+    },
+    {
+      title: "Messaging Angles, Ranked by Frequency",
+      body: [
+        "1. Social proof — reviews, ratings, and \"as seen in\" placements.",
+        "2. Problem–agitate–solve — naming the pain point before introducing the product as relief.",
+        "3. Urgency and scarcity — limited restock, time-boxed discount, or waitlist framing.",
+        "4. Comparison — implicit or explicit contrast against the category default or DIY alternative.",
+      ],
+    },
+    {
+      title: "Funnel & Offer Teardown",
+      body: [
+        "Landing pages are single-offer, single-CTA, with objection-handling FAQ placed just above the fold.",
+        "Primary offer mechanic is a bundle discount or a free-shipping threshold rather than a blanket percentage off.",
+        "Post-purchase upsell or subscription option is introduced after checkout intent, not before.",
+      ],
+    },
+    {
+      title: "Recommended Strategy",
+      body: [
+        `Open your pitch by naming the angle ${brandName} has not claimed yet — the gap is the opening.`,
+        "Lead your first test round with a UGC-style hook plus a comparison angle; both are cheap to produce and fast to read.",
+        "Match their offer structure only where it lowers risk for the buyer, and differentiate everywhere else.",
+      ],
+    },
+  ];
 }
 
 function escapeHtml(value: string): string {
@@ -131,8 +142,14 @@ export function renderSpyBriefHtml(brief: SpyBrief): string {
           </div>
 
           <footer class="page-footer">
-            <span>Prepared by SpyOutreach</span>
-            <span>spyoutreach.com</span>
+            <div class="page-footer-row">
+              <span>Prepared by SpyOutreach</span>
+              <span>spyoutreach.com</span>
+            </div>
+            <p class="page-footer-disclaimer">
+              AI-assisted analysis based on publicly available information. Reflects general
+              strategic patterns, not verified or guaranteed claims about the named brand.
+            </p>
           </footer>
         </section>
       `;
@@ -257,12 +274,23 @@ export function renderSpyBriefHtml(brief: SpyBrief): string {
   }
 
   .page-footer {
-    display: flex;
-    justify-content: space-between;
     padding-top: 8mm;
     border-top: 0.4mm solid #d2d2d7;
+  }
+
+  .page-footer-row {
+    display: flex;
+    justify-content: space-between;
     font-size: 8.5pt;
     color: #86868b;
+  }
+
+  .page-footer-disclaimer {
+    margin-top: 2mm;
+    font-size: 7pt;
+    line-height: 1.5;
+    color: #a1a1a6;
+    max-width: 150mm;
   }
 </style>
 </head>
