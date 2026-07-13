@@ -4,6 +4,25 @@ import { BRIEF_SECTION_TITLES, templateSections, type BriefSection } from "./spy
 
 const MODEL = "claude-haiku-4-5-20251001";
 const MAX_SITE_TEXT_LENGTH = 4000;
+const AI_TIMEOUT_MS = 20000;
+
+// The model occasionally ignores the array type and returns a single string
+// containing bracketed, newline-separated pseudo-list items instead. Recover
+// the individual lines rather than discarding an otherwise-usable response.
+function coerceToLines(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.filter((line): line is string => typeof line === "string");
+  }
+
+  if (typeof value === "string") {
+    return value
+      .split("\n")
+      .map((line) => line.trim().replace(/^\[?"(.*)"\]?$/, "$1"))
+      .filter((line) => line.length > 0);
+  }
+
+  return [];
+}
 
 export function normalizeUrl(target: string): string | null {
   const trimmed = target.trim();
@@ -76,24 +95,38 @@ export async function generateAiSections(
       ? `Here is text scraped from ${brandName}'s website — ground your analysis in it where relevant:\n\n"""${websiteText}"""`
       : `No website content is available for ${brandName}. If you don't have specific, reliable knowledge of this brand, clearly write generalized best-practice guidance for their apparent category instead of inventing specific facts about them.`;
 
-    const message = await anthropic.messages.create({
-      model: MODEL,
-      max_tokens: 1500,
-      tools: [briefTool],
-      tool_choice: { type: "tool", name: "generate_spy_brief" },
-      messages: [
+    // Belt-and-suspenders: the SDK's own `timeout` option can behave as an
+    // idle timeout rather than a hard wall-clock cap, so race it against a
+    // real timer too — this request must never be the reason the whole PDF
+    // generation blows past Vercel's function time budget.
+    const wallClockTimeout = new Promise<never>((_, reject) => {
+      setTimeout(() => reject(new Error("AI brief generation timed out")), AI_TIMEOUT_MS);
+    });
+
+    const message = await Promise.race([
+      anthropic.messages.create(
         {
-          role: "user",
-          content: `You are a senior paid-ads strategist writing a competitor "spy brief" for an agency pitching against ${brandName}.
+          model: MODEL,
+          max_tokens: 1500,
+          tools: [briefTool],
+          tool_choice: { type: "tool", name: "generate_spy_brief" },
+          messages: [
+            {
+              role: "user",
+              content: `You are a senior paid-ads strategist writing a competitor "spy brief" for an agency pitching against ${brandName}.
 
 ${context}
 
-Fill in 3-4 concise, specific, non-generic lines for each of the five fixed sections: ${BRIEF_SECTION_TITLES.join(", ")}.
+Fill in 3-4 concise, specific, non-generic lines for each of the five fixed sections: ${BRIEF_SECTION_TITLES.join(", ")}. Each line must be a separate array item — never combine multiple lines into one string.
 
 Be honest and grounded — do not fabricate specific claims (numbers, campaign names, quotes) you cannot support from the provided context. When context is thin, favor clearly-labeled general strategic patterns over invented specifics.`,
+            },
+          ],
         },
-      ],
-    });
+        { timeout: AI_TIMEOUT_MS },
+      ),
+      wallClockTimeout,
+    ]);
 
     const toolUse = message.content.find(
       (block): block is Anthropic.ToolUseBlock => block.type === "tool_use",
@@ -104,7 +137,7 @@ Be honest and grounded — do not fabricate specific claims (numbers, campaign n
 
     const sections: BriefSection[] = SECTION_KEYS.map((key, index) => ({
       title: BRIEF_SECTION_TITLES[index],
-      body: Array.isArray(input[key]) ? (input[key] as unknown[]).filter((line): line is string => typeof line === "string") : [],
+      body: coerceToLines(input[key]),
     }));
 
     const valid = sections.every((section) => section.body.length > 0);
